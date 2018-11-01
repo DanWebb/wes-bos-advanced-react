@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
 import {Mutation, Query} from 'react-apollo';
 import gql from 'graphql-tag';
-import Router from 'next/router';
-import formatMoney from '../lib/formatMoney';
 import Form from './styles/Form';
 import Error from '../components/ErrorMessage';
 
@@ -16,6 +14,7 @@ const SINGLE_ITEM_QUERY = gql`
 		}
 	}
 `;
+
 const UPDATE_ITEM_MUTATION = gql`
 	mutation UPDATE_ITEM_MUTATION(
 		$id: ID!

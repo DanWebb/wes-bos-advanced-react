@@ -1,5 +1,5 @@
 import React from 'react';
-import {withRouter} from 'next/router'
+import {withRouter} from 'next/router';
 import UpdateItem from '../components/UpdateItem';
 
 const Update = ({router: {query}}) => (
