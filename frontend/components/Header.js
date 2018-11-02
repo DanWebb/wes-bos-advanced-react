@@ -62,7 +62,7 @@ const Header = () => (
 	<StyledHeader>
 		<div className="bar">
 			<Logo>
-				<Link href="/"><a>Sick Fits</a></Link>
+				<Link href="/"><a>Emuz</a></Link>
 			</Logo>
 			<Nav/>
 		</div>
