@@ -1,3 +1,5 @@
+const {randomBytes} = require('crypto');
+const {promisify} = require('util');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -66,6 +68,55 @@ const Mutations = {
 		});
 
 		return {message: 'Success'};
+	},
+
+	async requestReset(parent, {email}, ctx, info) {
+		const user = await ctx.db.query.user({where: {email}});
+
+		if (!user) {
+			throw new Error(`No such user found for email ${email}`);
+		}
+
+		const resetToken = (await promisify(randomBytes)(20)).toString('hex');
+		const resetTokenExpiry = Date.now() + 3600000;
+		
+		await ctx.db.mutation.updateUser({
+			where: {email},
+			data: {resetToken, resetTokenExpiry}
+		});
+
+		return {message: 'Success'};
+	},
+
+	async resetPassword(parent, {resetToken, password, confirmPassword}, ctx, info) {
+		if (password !== confirmPassword) {
+			throw new Error('Please make sure your passwords match');
+		}
+
+		const [user] = await ctx.db.query.users({
+			where: {
+				resetToken,
+				resetTokenExpiry_gte: Date.now() - 3600000
+			}
+		});
+
+		if (!user) {
+			throw new Error('The reset period expired, please request a new reset');
+		}
+
+		const passwordHash = await bcrypt.hash(password, 10);
+		const updatedUser = await ctx.db.mutation.updateUser({
+			where: {email: user.email},
+			data: {password: passwordHash, resetToken: null, resetTokenExpiry: null}
+		});
+
+		const token = jwt.sign({userId: updatedUser.id}, process.env.APP_SECRET);
+		ctx.response.cookie('token', token, {
+			httpOnly: true,
+			maxAge: 1000 * 60 * 60 * 24 * 365
+		});
+
+		return updatedUser;
 	}
 };
 
