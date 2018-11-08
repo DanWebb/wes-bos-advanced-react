@@ -3,6 +3,7 @@ const {promisify} = require('util');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {transport, emailHtml} = require('../mail');
+const {hasPermission} = require('../utils');
 
 const Mutations = {
 	createItem(parent, args, ctx, info) {
@@ -138,6 +139,19 @@ const Mutations = {
 		});
 
 		return updatedUser;
+	},
+
+	updatePermissions(parent, args, ctx, info) {
+		if (ctx.request.userID) {
+			throw new Error('Log in first');
+		}
+
+		const user = ctx.request.user;
+		hasPermission(user, ['ADMIN', 'PERMISSIONUPDATE']);
+		return ctx.db.mutation.updateUser({
+			data: {permissions: {set: args.permissions}},
+			where: {id: args.userId}
+		}, info);
 	}
 };
 
