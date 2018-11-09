@@ -15,7 +15,9 @@ class DeleteItem extends Component {
 	handleDeleteItem = (e, deleteItem) => {
 		e.preventDefault();
 		if (confirm('Are you sure?')) {
-			return deleteItem();
+			return deleteItem().catch(err => {
+				alert(err.message);
+			});
 		}
 	}
 
