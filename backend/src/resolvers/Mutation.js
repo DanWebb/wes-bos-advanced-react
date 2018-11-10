@@ -192,6 +192,16 @@ const Mutations = {
 				item: {connect: {id: args.id}}
 			}
 		}, info);
+	},
+
+	async removeFromCart(parent, {id}, ctx, info) {
+		const cartItem = await ctx.db.query.cartItem({where: {id}}, '{user {id}}');
+
+		if (cartItem && cartItem.user.id !== ctx.request.userId) {
+			throw new Error('You are not allowed to delete that item');
+		}
+
+		return ctx.db.mutation.deleteCartItem({where: {id}}, info);
 	}
 };
 
