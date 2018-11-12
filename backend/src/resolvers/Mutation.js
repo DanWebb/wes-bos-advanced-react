@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {transport, emailHtml} = require('../mail');
 const {hasPermission} = require('../utils');
+const stripe = require('../stripe');
 
 const Mutations = {
 	createItem(parent, args, ctx, info) {
@@ -202,6 +203,51 @@ const Mutations = {
 		}
 
 		return ctx.db.mutation.deleteCartItem({where: {id}}, info);
+	},
+
+	async createOrder(parent, args, ctx, info) {
+		const {userId} = ctx.request;
+
+		if (!userId) {
+			throw new Error('Please sign in');
+		}
+
+		const user = await ctx.db.query.user(
+			{where: {id: userId}},
+			`{id name email cart {id quantity item {title price id description image largeImage}}}`
+		);
+
+		const amount = user.cart.reduce((tally, cartItem) => {
+			return tally + cartItem.item.price * cartItem.quantity;
+		}, 0);
+
+		const charge = await stripe.charges.create({
+			amount,
+			currency: 'USD',
+			source: args.token
+		});
+
+		const orderItems = user.cart.map(cartItem => {
+			const orderItem = {
+				...cartItem.item,
+				quantity: cartItem.quantity,
+				user: {connect: {id: userId}}
+			};
+			delete orderItem.id;
+			return orderItem;
+		});
+
+		const order = await ctx.db.mutation.createOrder({data: {
+			total: charge.amount,
+			charge: charge.id,
+			items: {create: orderItems},
+			user: {connect: {id: userId}}
+		}});
+
+		const cartItemIds = user.cart.map(cartItem => cartItem.id);
+		await ctx.db.mutation.deleteManyCartItems({where: {id_in: cartItemIds}});
+		
+		return order;
 	}
 };
 
