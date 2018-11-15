@@ -72,7 +72,7 @@ class CreateItem extends Component {
 		return (
 			<Mutation mutation={CREATE_ITEM_MUTATION} variables={this.state}>
 				{(createItem, {loading, error}) => (
-					<Form onSubmit={e => this.handleSubmit(e, createItem)}>
+					<Form data-test="form" onSubmit={e => this.handleSubmit(e, createItem)}>
 						<Error error={error}/>
 						<fieldset disabled={loading} aria-busy={loading}>
 							<label htmlFor="file">

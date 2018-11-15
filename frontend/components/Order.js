@@ -37,7 +37,7 @@ class Order extends Component {
 					if (error) return <Error error={error}/>
 					if (loading) return <p>Loading...</p>
 					return (
-						<OrderStyles>
+						<OrderStyles data-test="order">
 							<Head>
 								<title>EMUZ - Order {order.id}</title>
 							</Head>
@@ -61,11 +61,11 @@ class Order extends Component {
 								<span>Item Count:</span>
 								<span>{order.items.length}</span>
 							</p>
-							<div class="items">
+							<div className="items">
 								{order.items.map(item => (
-									<div key={item.id} class="order-item">
+									<div key={item.id} className="order-item">
 										<img src={item.image} alt={item.title}/>
-										<div class="item-details">
+										<div className="item-details">
 											<h2>{item.title}</h2>
 											<p>Qty: {item.quantity}</p>
 											<p>Each: {formatMoney(item.price)}</p>

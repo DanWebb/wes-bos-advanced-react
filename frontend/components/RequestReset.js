@@ -34,9 +34,9 @@ class RequestReset extends Component {
 				variables={this.state}
 			>
 				{(reset, {loading, error, called}) => (
-					<Form method="post" onSubmit={e => this.handleSubmit(e, reset)}>
+					<Form method="post" data-test="form" onSubmit={e => this.handleSubmit(e, reset)}>
 						<fieldset disabled={loading} aria-busy={loading}>
-							<h2>Request a password reset</h2>
+							<h2>Request a password reset {called}</h2>
 							<Error error={error}/>
 							{!error && !loading && called && (
 								<p>Check your email for a reset link!</p>
