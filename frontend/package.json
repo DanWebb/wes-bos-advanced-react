@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Sick Fits! An example React, GraphQL, Next and Apollo",
   "main": "index.js",
+  "now": {
+    "alias": "emuz"
+  },
   "scripts": {
     "dev": "next -p 7777",
     "build": "next build",
